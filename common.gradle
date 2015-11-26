@@ -51,3 +51,15 @@ task createFolders(description: 'Creates the source folders if they do not exist
         }
     }
 }
+
+test {
+    dependsOn 'cleanTest'
+}
+
+sourceSets {
+  test {
+    java {
+      srcDir 'src/java/test'
+    }
+  }
+}
