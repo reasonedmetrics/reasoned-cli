@@ -1,5 +1,9 @@
 package com.rdms.cli.example;
 
+import com.rdms.cli.Arg;
+import com.rdms.cli.example.ExampleApp.Flags;
+import java.util.EnumSet;
+import java.util.Set;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -38,10 +42,18 @@ public class ExampleTaskTest {
     }
 
     @Test
-    public void testRun() {
+    public void testRun_nullFlags() {
         ExampleTask task = new ExampleTask();
-        task.run();
+        task.run(null);
         assertEquals("Doing example things now\n", systemOutRule.getLog());
+    }
+
+    @Test
+    public void testRun_withFlags() {
+        ExampleTask task = new ExampleTask();
+        Set<? extends Arg> flags = EnumSet.of(Flags.DO_IT_DIFFERENT);
+        task.run(flags);
+        assertEquals("Doing example things now - flag on\n", systemOutRule.getLog());
     }
 
 }

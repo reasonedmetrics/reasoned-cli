@@ -75,6 +75,13 @@ public class ExampleAppTest {
         assertEquals("Doing example things now\n", systemOutRule.getLog());
     }
 
+    @Test
+    public void testMain_shortArgWithFlag() {
+        String[] args = new String[]{"-e", "-d"};
+        ExampleApp.main(args);
+        assertEquals("Doing example things now - flag on\n", systemOutRule.getLog());
+    }
+
     @Test(expected = CLIRuntimeException.class)
     public void testMain_longArgWrong() {
         String[] args = new String[]{"--fake"};
@@ -86,6 +93,13 @@ public class ExampleAppTest {
         String[] args = new String[]{"--example"};
         ExampleApp.main(args);
         assertEquals("Doing example things now\n", systemOutRule.getLog());
+    }
+
+    @Test
+    public void testMain_longArgWithFlag() {
+        String[] args = new String[]{"--example", "-d"};
+        ExampleApp.main(args);
+        assertEquals("Doing example things now - flag on\n", systemOutRule.getLog());
     }
 
 }

@@ -9,6 +9,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import com.google.common.base.CaseFormat;
+import java.util.AbstractSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
@@ -40,6 +43,11 @@ abstract public class BasicCLI implements CLI {
     @Getter(AccessLevel.PUBLIC)
     @NonNull
     private Collection<Task> tasks;
+
+    @Setter(AccessLevel.PROTECTED)
+    @Getter(AccessLevel.PUBLIC)
+    @NonNull
+    private Set<? extends Arg> flags;
 
     @Setter(AccessLevel.PRIVATE)
     @Getter(AccessLevel.PRIVATE)
@@ -138,6 +146,7 @@ abstract public class BasicCLI implements CLI {
             setOptions(new Options());
         }
         buildTaskOptions();
+        buildFlagOptions();
     }
 
     private void buildTaskOptions() {
@@ -149,6 +158,15 @@ abstract public class BasicCLI implements CLI {
         getOptions().addOptionGroup(taskOptions);
     }
 
+    private void buildFlagOptions() {
+        if (getFlags() != null) {
+            for (Arg arg : getFlags()) {
+                Option option = Option.builder(arg.getArg()).longOpt(arg.getLongArg()).desc(arg.getDescription()).build();
+                getOptions().addOption(option);
+            }
+        }
+    }
+
     private void processArgs() {
         CommandLineParser parser = new DefaultParser();
         try {
@@ -157,13 +175,23 @@ abstract public class BasicCLI implements CLI {
             throw new CLIRuntimeException(RuntimeErrors.FAILED_TO_PARSE_COMMAND_LINE, ex);
         }
     }
+    
+    private Set<Arg> getEnabledFlags() {
+        Set<Arg> enabledFlags = new HashSet<>();
+        for(Arg arg : getFlags()) {
+            if(getCommandLine().hasOption(arg.getArg())) {
+                enabledFlags.add(arg);
+            }
+        }
+        return enabledFlags;
+    }
 
     private void runTasks() {
         boolean ranATask = false;
         for (Task task : getTasks()) {
             if (getCommandLine().hasOption(task.getArg())) {
                 LOGGER.log(Level.INFO, "Running task {0}", task.getName());
-                task.run();
+                task.run(getEnabledFlags());
                 ranATask = true;
             }
         }
